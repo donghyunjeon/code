@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang=ko>
+
+<head>
+    <style>
+      #canvas { border: 1px solid lightgrey; }
+        body { padding: 25px;  font: 12px "Lucida Grande", Helvetica, Arial, sans-serif; }
+        iframe { overflow: hidden; }
+        #title { font-weight: bold;  font-size: 12.5px; }
+        a { color: #00B7FF; }
+      
+      .video {
+            margin: 0 auto;
+            width: 1000px;
+            height: 450px;
+        }
+
+        .btn {
+            display: flex;
+        }
+        .btn_time {
+            margin: 100px auto;
+            width: 200px;
+            height: 50px;
+        }
+
+        .btn_eat {
+            
+            margin: 100px auto;
+            width: 200px;
+            height: 50px;
+        }
+
+    </style>
+   <title>Communicate with Arduino</title>
+</head>
+
+<body>
+    
+    <iframe src="about:blank" width="0" height="0" frameborder="0" border="0" marginwidth="0" marginheight="0" name="iframe"></iframe>
+    
+    <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+   <script src="/socket.io/socket.io.js"></script>
+   
+<h1 id="clock" style="color:gray;">00:00</h1>
+
+<ol>
+   
+   <div class="btn"><p>
+     <div class="btn_time"><h2>밥주는 시간</h2>
+	<form action="/test" method="post">
+    <input type = "time" name="예약시간"> <input type="submit"  value="설정하기" onclick="test()" >
+	</p><p id="demo"></p>
+    </div>
+	</form>
+     <div class="btn_eat"><h2>먹이주기</h2>
+	 <form action="/eating" method="post">
+       <input type="submit" value="먹이주기" name='먹이들어가요'></div>
+     </div>
+   </ol>
+
+
+<script>
+   
+   var setHours;
+   var setMinutes;
+   var setSeconds;
+   
+   var clockTarget = document.getElementById("clock");
+   var date;
+   var month;
+   var clockDate;
+   var day;
+   var week;
+   var hours;
+   var minutes;
+   var seconds;
+
+   function clock() {
+      date = new Date();
+      month = date.getMonth();
+      clockDate = date.getDate();
+      day = date.getDay();
+      week = ['일', '월', '화', '수', '목', '금', '토'];
+      hours = date.getHours();
+      minutes = date.getMinutes();
+      seconds = date.getSeconds();
+      
+      clockTarget .innerText = `${month+1}월 ${clockDate}일 ${week[day]}요일` +
+      `${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes }`  : minutes }:${seconds < 10 ? `0${seconds }`  : seconds }`;
+      
+      if (hours==12 && minutes==35 && seconds==30) {
+         clockTarget .innerText = `바바바바밥`;
+         iframe.location.href=("http://localhost:3000/09_00");
+         clearInterval(a);
+         a = setInterval(clock, 1000);
+         
+      }
+      
+   }
+
+   
+   function test() {
+       var x = document.getElementById("text").value;
+	   document.getElementById("demo").innerHTML = x;
+      }
+
+
+   function init() {
+      clock();
+      a = setInterval(clock, 1000);
+   }
+
+
+   init();
+   
+   
+   
+
+
+</script>
+
+</body>
+</html>
