@@ -1,124 +1,181 @@
 <!DOCTYPE html>
-<html lang=ko>
-
+<html lang="ko">
 <head>
-    <style>
-      #canvas { border: 1px solid lightgrey; }
-        body { padding: 25px;  font: 12px "Lucida Grande", Helvetica, Arial, sans-serif; }
-        iframe { overflow: hidden; }
-        #title { font-weight: bold;  font-size: 12.5px; }
-        a { color: #00B7FF; }
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Communicate with Arduino</title>
+
+  <style>
+    /* reset */
+    * {margin: 0; padding: 0; box-sizing: border-box;}
+
+
+    #wrap {
+      position: relative;
       
-      .video {
-            margin: 0 auto;
-            width: 1000px;
-            height: 450px;
-        }
+      margin: 0 auto;
+    }
+    #canvas { border: 1px solid lightgrey; }
+      body { padding: 25px;  font: 12px "Lucida Grande", Helvetica, Arial, sans-serif; }
+      iframe { overflow: hidden; }
+      #title { font-weight: bold;  font-size: 12.5px; }
+      a { color: #00B7FF; }
+   
+    .now {
+      position: absolute;
+      }
 
-        .btn {
-            display: flex;
-        }
-        .btn_time {
-            margin: 100px auto;
-            width: 200px;
-            height: 50px;
-        }
+    .btn_time{
+      position: absolute;
+      top: 20px;
+      left: 650px;
+    }
+    
+    .break {
+      position: absolute;
+      top: 90px;
+      left: 650px;
+     font-size: 15px;
+    }
 
-        .btn_eat {
-            
-            margin: 100px auto;
-            width: 200px;
-            height: 50px;
-        }
+    .eating {
+     font-size: 18px;
+    }
+   
+   h2 {
+   font-size: 25px;
+   }
 
-    </style>
-   <title>Communicate with Arduino</title>
+  </style>
 </head>
 
 <body>
-    
-    <iframe src="about:blank" width="0" height="0" frameborder="0" border="0" marginwidth="0" marginheight="0" name="iframe"></iframe>
-    
-    <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
-   <script src="/socket.io/socket.io.js"></script>
+<div id="wrap">
+<div class="now">
+<iframe src="about:blank" width="0" height="0" frameborder="0" border="0" marginwidth="0" marginheight="0" name="iframe"></iframe>
    
+<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+ 
 <h1 id="clock" style="color:gray;">00:00</h1>
 
-<ol>
-   
-   <div class="btn"><p>
-     <div class="btn_time"><h2>밥주는 시간</h2>
-	<form action="/test" method="post">
-    <input type = "time" name="예약시간"> <input type="submit"  value="설정하기" onclick="test()" >
-	</p><p id="demo"></p>
-    </div>
-	</form>
-     <div class="btn_eat"><h2>먹이주기</h2>
-	 <form action="/eating" method="post">
-       <input type="submit" value="먹이주기" name='먹이들어가요'></div>
-     </div>
-   </ol>
+<br><br>
+
+<button class="eating" onclick="eating()">먹이주기</button>
+</div>
+
+
+<div class="btn_time">
+<h2>밥주는 시간</h2>
+
+<form id="form" action="/test" method="post" >
+<input type="time" id="data1" name="예약시간">
+<input type="submit"  value="설정하기" onclick="test()" >
+</form>
+
+<iframe src="about:blank" width="129" height="35" frameborder="0"
+marginwidth="0" marginheight="0" scrolling="no" name="response">
+</iframe>
+</div>
+
+<br>
+<table border="1" class="break">
+<tr>
+<td>멍멍이 아침밥 &nbsp; : </td><td id="box1">미설정</td>
+</tr>
+<tr>
+<td>멍멍이 점심밥 &nbsp; : </td><td id="box2">미설정</td>
+</tr>
+<tr>
+<td>멍멍이 저녁밥 &nbsp; : </td><td id="box3">미설정</td>
+</tr>
+</table>
 
 
 <script>
-   
-   var setHours;
-   var setMinutes;
-   var setSeconds;
-   
-   var clockTarget = document.getElementById("clock");
-   var date;
-   var month;
-   var clockDate;
-   var day;
-   var week;
-   var hours;
-   var minutes;
-   var seconds;
 
-   function clock() {
-      date = new Date();
-      month = date.getMonth();
-      clockDate = date.getDate();
-      day = date.getDay();
-      week = ['일', '월', '화', '수', '목', '금', '토'];
-      hours = date.getHours();
-      minutes = date.getMinutes();
-      seconds = date.getSeconds();
-      
-      clockTarget .innerText = `${month+1}월 ${clockDate}일 ${week[day]}요일` +
-      `${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes }`  : minutes }:${seconds < 10 ? `0${seconds }`  : seconds }`;
-      
-      if (hours==12 && minutes==35 && seconds==30) {
-         clockTarget .innerText = `바바바바밥`;
-         iframe.location.href=("http://localhost:3000/09_00");
-         clearInterval(a);
-         a = setInterval(clock, 1000);
+$(document).ready(function()
+{
+$(function()
+      {
          
-      }
-      
-   }
+var socket = io();
 
+socket.on('time', function( input ){
+iframe.location.href=("http://localhost:3000/morning");
+});
+
+socket.on('flag1', function( input1 ){
+$('#box1').text(input1);
+});
+
+socket.on('flag2', function( input1, input2 ){
+$('#box1').text(input1);
+$('#box2').text(input2);
+});
+
+socket.on('flag3', function( input1, input2, input3 ){
+$('#box1').text(input1);
+$('#box2').text(input2);
+$('#box3').text(input3);
+});
+         
+});
+
+});
+ 
+
+ 
+ var clockTarget = document.getElementById("clock");
+ var date;
+ var month;
+ var clockDate;
+ var day;
+ var week;
+ var hours;
+ var minutes;
+ var seconds;
+ 
+ var setHours;
+ var setMinutes;
+ 
+
+ function clock() {
+    date = new Date();
+    month = date.getMonth();
+    clockDate = date.getDate();
+    day = date.getDay();
+    week = ['일', '월', '화', '수', '목', '금', '토'];
+    hours = date.getHours();
+    minutes = date.getMinutes();
+    seconds = date.getSeconds();
    
-   function test() {
-       var x = document.getElementById("text").value;
-	   document.getElementById("demo").innerHTML = x;
-      }
+    clockTarget .innerText = `${month+1}월 ${clockDate}일 ${week[day]}요일` +
+    `${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes }`  : minutes }:${seconds < 10 ? `0${seconds }`  : seconds }`;  
+ }
 
+ function test() {
+     var x = document.getElementById("data1").value;
+alert(x);
 
-   function init() {
-      clock();
-      a = setInterval(clock, 1000);
-   }
+}
 
+function eating() {
+iframe.location.href=("http://localhost:3000/morning");
+}
 
-   init();
-   
-   
-   
+ function init() {
+    clock();
+    a = setInterval(clock, 1000);
+ }
 
+ init();
+ 
 
 </script>
+</div>
 
 </body>
+
 </html>
